@@ -313,7 +313,7 @@ reportEmi <- function(gdx, output = NULL, regionSubsetList = NULL,
 
 
   vm_incinerationCCS <- readGDX(gdx, "o37_incinerationCCS", field = "l",
-                                restore_zeros = FALSE, spatial = 2,
+                                restore_zeros = TRUE, spatial = 2,
                                 react = "silent")[, t, ]
 
   if (is.null(vm_incinerationCCS)) {
