@@ -314,12 +314,15 @@ reportEmi <- function(gdx, output = NULL, regionSubsetList = NULL,
   vm_incinerationEmi <- magclass::matchDim(vm_incinerationEmi, v37_plasticsCarbon, fill = 0)
 
 
-  vm_incinerationCCS <- readGDX(gdx, "o37_incinerationCCS", field = "l",
-                                restore_zeros = TRUE, spatial = 2,
-                                react = "silent")[, t, ]
+  vm_incinerationCCS <- tryCatch({
+    readGDX(gdx, "o37_incinerationCCS", restore_zeros = FALSE, spatial = 2, react = "silent")[, t, ]
+  }, error = function(e) NULL)
 
   if (is.null(vm_incinerationCCS)) {
-    rm("vm_incinerationCCS")
+    # rm("vm_incinerationCCS")
+    # HOTFIX this leads to an error in line 522, therefore we create a zero magpie here
+    vm_incinerationCCS <- vm_incinerationEmi
+    vm_incinerationCCS[,] <- 0
   } else {
     vm_incinerationCCS[is.na(vm_incinerationCCS)] <- 0
     vm_incinerationCCS <- magclass::matchDim(vm_incinerationCCS, vm_incinerationEmi)
