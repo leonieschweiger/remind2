@@ -328,7 +328,7 @@ if ("Price|Carbon|SCC" %in% data$variable) {
 }
 ```
 
-```{r 01_summary/CO2 Prices per sector}
+```{r CO2 Prices per sector}
 items <- c(
   "Price|Carbon|Demand|Transport",
   "Price|Carbon|Demand|Buildings",
