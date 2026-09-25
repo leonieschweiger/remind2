@@ -983,9 +983,6 @@ reportFE <- function(gdx, regionSubsetList = NULL,
 
     } else {
 
-      # mapping of industrial output to energy production factors in CES tree
-      ces_eff_target_dyn37 <- readGDX(gdx, "ces_eff_target_dyn37")
-
       mixer <- tribble(
         ~variable,                                                                                     ~all_in,
         "FE|Industry|Chemicals|Electricity|+|Mechanical work and low-temperature heat (EJ/yr)",        "feelwlth_chemicals",
@@ -999,7 +996,7 @@ reportFE <- function(gdx, regionSubsetList = NULL,
     }
 
     mixer <- tribble(
-      ~variable,
+      ~variable,                                                                                     ~all_in,
       "FE|Industry|Other Industry|Electricity|+|Mechanical work and low-temperature heat (EJ/yr)",   "feelwlth_otherInd",
       "FE|Industry|Other Industry|Electricity|+|High-temperature heat (EJ/yr)",                      "feelhth_otherInd"
     )
