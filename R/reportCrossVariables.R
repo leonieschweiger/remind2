@@ -21,8 +21,7 @@
 #' @export
 #' @importFrom assertr assert not_na
 #' @importFrom gdx readGDX
-#' @importFrom magclass getYears getRegions mbind setNames mselect
-#' new.magpie setYears mcalc
+#' @importFrom magclass getYears getRegions mbind setNames mselect new.magpie setYears mcalc
 #' @importFrom tibble as_tibble
 #' @importFrom data.table :=
 #' @importFrom tidyselect everything
@@ -79,9 +78,6 @@ reportCrossVariables <- function(gdx, output = NULL, regionSubsetList = NULL,
     / dimSums(mselect(demPE,all_enty="pebiolc"),dim=3),    "SE|Liquids|Biomass|Cellulosic|++|Energy Crops (EJ/yr)"))
 
 
-  tmp <- mbind(tmp,setNames(
-    output[r,,"Energy Investments (billion US$2017/yr)"]
-    -output[r,,"Energy Investments|Electricity (billion US$2017/yr)"],"Energy Investments|Non-Electricity (billion US$2017/yr)"))
   # gas capacity factor
   tmp <- mbind(tmp,setNames(
     output[r,,"SE|Electricity|Gas (EJ/yr)"] / output[r,,"Cap|Electricity|Gas (GW)"] / TWa_2_EJ * 1000 * 100,
@@ -401,7 +397,7 @@ reportCrossVariables <- function(gdx, output = NULL, regionSubsetList = NULL,
   }
 
   # add adjusted electricity from coal and other fossils ----
-  # TODO: deprecated fallback, will be removed eventually
+
   if (is.null(extraData)) {
 
     regionHash <- digest::digest(sort(readGDX(gdx, "all_regi")), "xxhash32")
@@ -415,14 +411,17 @@ reportCrossVariables <- function(gdx, output = NULL, regionSubsetList = NULL,
       stop("No file 'se_otherfoss.cs4r' found for regions in .gdx file.")
     }
 
-    projections <- read.csv(
-      system.file("extdata", otherFossilsFile, package = "remind2"),
-      sep = ",", skip = 4, header = FALSE
-    ) %>% as.magpie(temporal = 1, spatial = 2)
+    # download auxiliary file from RSE server
+    f <- downloadAuxiliaryFile(otherFossilsFile)
+
+    projections <- read.csv(f, sep = ",", skip = 4, header = FALSE) %>%
+      as.magpie(temporal = 1, spatial = 2)
 
     if (!is.null(regionSubsetList)) {
       projections <- mbind(projections, calc_regionSubset_sums(projections, regionSubsetList))
     }
+
+    unlink(f)
 
   } else {
 

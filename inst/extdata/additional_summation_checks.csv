@@ -30,13 +30,18 @@ Emi|GHG;Emi|CO2|CDR|+|Materials;1
 Emi|GHG;Emi|CO2|CDR|+|Synthetic Fuels CCS;1
 ;;
 # total CO2 emissions by sectors with separation into gross and negative emissions;;
-Emi|CO2;Emi|CO2|Gross|Energy|Supply|+|Electricity;1
-Emi|CO2;Emi|CO2|Gross|Energy|Supply|Non-electric;1
-Emi|CO2;Emi|CO2|Energy|Demand|+|Transport;1
-Emi|CO2;Emi|CO2|Gross|Energy|Demand|+|Industry;1
-Emi|CO2;Emi|CO2|Energy|Demand|+|Buildings;1
-Emi|CO2;Emi|CO2|Gross|Energy|Demand|+|CDR Sector;1
-Emi|CO2;Emi|CO2|Gross|Waste;1
+Emi|CO2|+|Land-Use Change;Emi|CO2|Gross|+|Land-Use Change;1
+Emi|CO2|+|Land-Use Change;Emi|CO2|CDR|+|Land-Use Change;1
+;;
+Emi|CO2|Gross|+|Energy;Emi|CO2|Gross|Energy|Supply|+|Electricity;1
+Emi|CO2|Gross|+|Energy;Emi|CO2|Gross|Energy|Supply|Non-electric;1
+Emi|CO2|Gross|+|Energy;Emi|CO2|Energy|Demand|+|Transport;1
+Emi|CO2|Gross|+|Energy;Emi|CO2|Gross|Energy|Demand|+|Industry;1
+Emi|CO2|Gross|+|Energy;Emi|CO2|Energy|Demand|+|Buildings;1
+Emi|CO2|Gross|+|Energy;Emi|CO2|Gross|Energy|Demand|+|CDR Sector;1
+;;
+Emi|CO2;Emi|CO2|Gross|+|Energy;1
+Emi|CO2;Emi|CO2|Gross|+|Waste;1
 Emi|CO2;Emi|CO2|+|Land-Use Change;1
 Emi|CO2;Emi|CO2|+|Industrial Processes;1
 Emi|CO2;Emi|CO2|CDR|+|BECCS;1
@@ -115,21 +120,12 @@ Carbon Management|Carbon Capture;Carbon Management|Venting of Captured Carbon;1
 Carbon Sequestration|Direct Air Capture;Emi|CO2|CDR|DACCS;-1
 ;;
 # check Energy Investments subcategories;;
-Energy Investments|Electricity|Fossil;Energy Investments|Electricity|Coal;1
-Energy Investments|Electricity|Fossil;Energy Investments|Electricity|Gas;1
-Energy Investments|Electricity|Fossil;Energy Investments|Electricity|Oil;1
-Energy Investments|Electricity;Energy Investments|Electricity|Fossil;1
-Energy Investments|Electricity;Energy Investments|Electricity|Non-Fossil;1
-Energy Investments|Electricity;Energy Investments|Electricity|+|Storage;1
-Energy Investments|Electricity;Energy Investments|Electricity|+|Grid;1
-Energy Investments|Electricity;Energy Investments|Electricity|+|Hydrogen;1
-Energy Investments|Electricity|Non-Bio Re;Energy Investments|Electricity|Hydro;1
-Energy Investments|Electricity|Non-Bio Re;Energy Investments|Electricity|Geothermal;1
-Energy Investments|Electricity|Non-Bio Re;Energy Investments|Electricity|Wind;1
-Energy Investments|Electricity|Non-Bio Re;Energy Investments|Electricity|Solar;1
-Energy Investments|Liquids|+|Fossil;Energy Investments|Liquids|Oil Ref;1
-Energy Investments|Liquids|+|Fossil;Energy Investments|Liquids|Fossil|w/o oil;1
-Energy Investments|Heat|Fossil;Energy Investments|Heat|+|Gas;1
-Energy Investments|Heat|Fossil;Energy Investments|Heat|+|Coal;1
-Energy Investments|Liquids including gas stations;Energy Investments|Liquids|Transport and Distribution including gas stations;1
-Energy Investments|Liquids including gas stations;Energy Investments|Liquids;1
+Investment|Energy Supply|Electricity|++|Fossil;Investment|Energy Supply|Electricity|+|Coal;1
+Investment|Energy Supply|Electricity|++|Fossil;Investment|Energy Supply|Electricity|+|Gas;1
+Investment|Energy Supply|Electricity|++|Fossil;Investment|Energy Supply|Electricity|+|Oil;1
+Investment|Energy Supply|Electricity|Non-Fossil|++|Non-Bio Re;Investment|Energy Supply|Electricity|+|Hydro;1
+Investment|Energy Supply|Electricity|Non-Fossil|++|Non-Bio Re;Investment|Energy Supply|Electricity|+|Geothermal;1
+Investment|Energy Supply|Electricity|Non-Fossil|++|Non-Bio Re;Investment|Energy Supply|Electricity|+|Wind;1
+Investment|Energy Supply|Electricity|Non-Fossil|++|Non-Bio Re;Investment|Energy Supply|Electricity|+|Solar;1
+Investment|Energy Supply|Heat|Fossil;Investment|Energy Supply|Heat|+|Gas;1
+Investment|Energy Supply|Heat|Fossil;Investment|Energy Supply|Heat|+|Coal;1

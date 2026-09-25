@@ -20,8 +20,10 @@ Useful links:
 
 Authors:
 \itemize{
+  \item Renato Rodrigues \email{renato.rodrigues@pik-potsdam.de}
   \item Lavinia Baumstark
   \item Falk Benke
+  \item David Bantje
   \item Jan Philipp Dietrich
   \item Alois Dirnaichner
   \item Tabea Dorndorf
@@ -33,16 +35,20 @@ Authors:
   \item David Klein
   \item Johannes Koch
   \item Katarzyna Kowalczyk
+  \item Fabrice Lécuyer
   \item Antoine Levesque
   \item Aman Malik
   \item Anne Merfort
   \item Leon Merfort
   \item Simón Morena-Leiva
+  \item Adrian Odenweller
   \item Michaja Pehl
   \item Robert Pietzcker
   \item Sebastian Rauner
   \item Oliver Richters
   \item Marianna Rottoli
+  \item Tonn Rüter \email{tonn.rueter@pik-potsdam.de}
+  \item Robert Salzwedel
   \item Christof Schötz
   \item Felix Schreyer
   \item Kais Siala
@@ -51,7 +57,7 @@ Authors:
   \item Jessica Strefler
   \item Philipp Verpoort
   \item Pascal Weigmann
-  \item Tonn Rüter \email{tonn.rueter@pik-potsdam.de}
+  \item Simon Krogmann
 }
 
 }

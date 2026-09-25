@@ -25,9 +25,10 @@
 #' @importFrom gdx readGDX
 #' @importFrom magclass getYears mbind setNames
 #' @importFrom dplyr tribble
-reportCapitalStock <- function(gdx, regionSubsetList = NULL,
+reportCapitalStock <- function(gdx,
+                               regionSubsetList = NULL,
                                t = c(seq(2005, 2060, 5), seq(2070, 2110, 10), 2130, 2150),
-                               gdx_ref = gdx_ref) {
+                               gdx_ref = NULL) {
 
   module2realisation <- readGDX(gdx, "module2realisation", react = "silent")
   tran_mod <- module2realisation[module2realisation$modules == "transport", 2]
@@ -42,7 +43,7 @@ reportCapitalStock <- function(gdx, regionSubsetList = NULL,
   vm_cap <- readGDX(gdx, name = c("vm_cap"), field = "l", format = "first_found")
   vm_deltaCap <- readGDX(gdx, name = c("vm_deltaCap"), field = "l", format = "first_found")
 
-  v_investcost <- readGDX(gdx, name = c("vm_costTeCapital", "v_costTeCapital", "v_investcost"), field = "l", format = "first_found")
+  vm_costTeCapital <- readGDX(gdx, name = c("vm_costTeCapital", "v_costTeCapital"), field = "l", format = "first_found")
   vm_cesIO <- readGDX(gdx, name = "vm_cesIO", field = "l")
 
   # read parameters
@@ -51,10 +52,10 @@ reportCapitalStock <- function(gdx, regionSubsetList = NULL,
   chemicals_process_based <- "chemicals" %in% readGDX(gdx, "secInd37Prc", react='silent') #TOCHECK:QIANZHI
 
   # calculate maximal temporal resolution
-  y <- Reduce(intersect, list(getYears(vm_cap), getYears(v_investcost)))
+  y <- Reduce(intersect, list(getYears(vm_cap), getYears(vm_costTeCapital)))
   vm_cap <- vm_cap[, y, ]
   vm_deltaCap <- vm_deltaCap[, y, ]
-  v_investcost <- v_investcost[, y, ]
+  vm_costTeCapital <- vm_costTeCapital[, y, ]
 
   if (!is.null(gdx_ref)) {
     cm_startyear <- as.integer(readGDX(gdx, name = "cm_startyear", format = "simplest"))
@@ -69,14 +70,14 @@ reportCapitalStock <- function(gdx, regionSubsetList = NULL,
   # ---- report transport capital stocks ----
   if (tran_mod == "complex") {
     LDV35 <- readGDX(gdx, name = c("LDV35"), format = "first_found")
-    tmp <- mbind(tmp, setNames(dimSums((vm_cap * v_investcost)[teue2rlf],
+    tmp <- mbind(tmp, setNames(dimSums((vm_cap * vm_costTeCapital)[teue2rlf],
                                        dim = c(3.1, 3.2)) * 1000, "Est Capital Stock|ESM|Transp vehic (billion US$2017)"))
-    tmp <- mbind(tmp, setNames(dimSums((vm_cap * v_investcost)[teall2rlf][, , LDV35],
+    tmp <- mbind(tmp, setNames(dimSums((vm_cap * vm_costTeCapital)[teall2rlf][, , LDV35],
                                        dim = c(3.1, 3.2)) * 1000, "Est Capital Stock|ESM|Pet/EV LDV (billion US$2017)"))
 
     tmp <- mbind(tmp,
                  setNames(
-                   dimSums(mbind(vm_cap * v_investcost),
+                   dimSums(mbind(vm_cap * vm_costTeCapital),
                            dim = 3) * 1000,
                    "Estimated Capital Stock|ESM (billion US$2017)"
                  )

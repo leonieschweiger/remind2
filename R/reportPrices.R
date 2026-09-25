@@ -13,6 +13,8 @@
 #' t=c(seq(2005,2060,5),seq(2070,2110,10),2130,2150)
 #' @param gdx_ref a GDX object as created by readGDX, or the path to a gdx of the reference run.
 #' It is used to guarantee consistency for Moving Avg prices before cm_startyear
+#' @param extraData path to extra data files to be used in the reporting
+#' (might be needed when reportEmi is executed from within this function)
 #'
 #' @return MAgPIE object - contains the price variables
 #' @author Alois Dirnaichner, Felix Schreyer, David Klein, Renato Rodrigues, Falk Benke
@@ -24,8 +26,8 @@
 #'
 #' @importFrom dplyr %>% case_when distinct filter inner_join tibble left_join rename
 #' @importFrom gdx readGDX
-#' @importFrom magclass mbind getYears getRegions setNames dimExists new.magpie
-#' lowpass complete_magpie getItems<- getNames unitsplit unitjoin
+#' @importFrom magclass mbind getYears getRegions setNames dimExists new.magpie lowpass
+#' @importFrom magclass complete_magpie getItems<- getNames unitsplit unitjoin
 #' @importFrom quitte df.2.named.vector getColValues
 #' @importFrom readr read_csv
 #' @importFrom madrat toolAggregate
@@ -33,7 +35,7 @@
 #' @export
 reportPrices <- function(gdx, output = NULL, regionSubsetList = NULL,
                          t = c(seq(2005, 2060, 5), seq(2070, 2110, 10), 2130, 2150),
-                         gdx_ref = NULL) {
+                         gdx_ref = NULL, extraData = NULL) {
   ## bind to output object
   if (is.null(output)) {
     message("reportPrices executes reportPE ", appendLF = FALSE)
@@ -43,7 +45,7 @@ reportPrices <- function(gdx, output = NULL, regionSubsetList = NULL,
     message("- reportFE ", appendLF = FALSE)
     output <- mbind(output, reportFE(gdx, regionSubsetList = regionSubsetList, t = t))
     message("- reportEmi ", appendLF = FALSE)
-    output <- mbind(output, reportEmi(gdx, output = output, regionSubsetList = regionSubsetList, t = t))
+    output <- mbind(output, reportEmi(gdx, output = output, regionSubsetList = regionSubsetList, t = t, extraData = extraData))
     message("- reportExtraction ", appendLF = FALSE)
     output <- mbind(output, reportExtraction(gdx, regionSubsetList = regionSubsetList, t = t))
     message("- reportMacroEconomy")
@@ -61,7 +63,7 @@ reportPrices <- function(gdx, output = NULL, regionSubsetList = NULL,
   ####### conversion factors ##########
   s_GWP_CH4 <- readGDX(gdx, c("sm_gwpCH4", "s_gwpCH4", "s_GWP_CH4"), format = "first_found", react = "silent")
   s_GWP_N2O <- readGDX(gdx, c("s_gwpN2O", "s_GWP_N2O"), format = "first_found", react = "silent")
-  s_twa2mwh <- readGDX(gdx, "sm_TWa_2_MWh", format = "first_found", reacht = "silent")
+  s_twa2mwh <- readGDX(gdx, "sm_TWa_2_MWh", format = "first_found", react = "silent")
   tdptwyr2dpgj <- 31.71   # TerraDollar per TWyear to Dollar per GJ
   p80_subset   <- c("perm", "good", "peur", "peoil", "pegas", "pecoal", "pebiolc") # TODO: read in from gdx as sets trade
   s_tBC_2_TWa <- readGDX(gdx, name = "sm_tBC_2_TWa", format = "first_found", react = "silent")
@@ -137,11 +139,11 @@ reportPrices <- function(gdx, output = NULL, regionSubsetList = NULL,
 
 
   sector <- emi_sectors <- all_emiMkt <- NULL
+
   fe.entries <- entyFe2Sector %>%
     left_join(sector2emiMkt, by = "emi_sectors", relationship = "many-to-many") %>%
     rename(sector = emi_sectors, emiMkt = all_emiMkt) %>%
-    filter(sector != "CDR")
-
+    filter(!(sector %in% c("CDR", "cdr")))
 
   fe.entries.dot <- paste(fe.entries[, 1], fe.entries[, 2], fe.entries[, 3], sep = ".")
 
@@ -276,8 +278,9 @@ reportPrices <- function(gdx, output = NULL, regionSubsetList = NULL,
                         "Price|Primary Energy|Gas (US$2017/GJ)"),
                setNames(mselect(pm_PEPrice, all_enty = "pecoal") * tdptwyr2dpgj,
                         "Price|Primary Energy|Coal (US$2017/GJ)"),
-               setNames(mselect(pm_PEPrice, all_enty = "peur") * tdptwyr2dpgj,
-                        "Price|Primary Energy|Nuclear (US$2017/GJ)"),
+                # nuclear fuel prices for uranium are in T$/Mt_Ur in REMIND, transform to $/kg_Ur
+               setNames(mselect(pm_PEPrice, all_enty = "peur") * 1e3,
+                        "Price|Primary Energy|Nuclear (US$2017/kg_Ur)"),
                ## only modern (ligno-cellulosic) biomass reported
                setNames(mselect(pm_PEPrice, all_enty = "pebiolc") * tdptwyr2dpgj,
                         "Price|Primary Energy|Biomass|Modern (US$2017/GJ)"),
@@ -362,7 +365,7 @@ reportPrices <- function(gdx, output = NULL, regionSubsetList = NULL,
         indst = "Industry",
         build = "Buildings",
         trans = "Transport",
-        CDR = "CDR"
+        cdr = "CDR"
       ),
       emiMkt = c(
         ETS = "ETS",
@@ -371,12 +374,26 @@ reportPrices <- function(gdx, output = NULL, regionSubsetList = NULL,
       )
     )
 
+    ## Ensure backwards compatibility for release version 3.6.0 (can be removed with 3.7.0)
+
+    if ("CDR" %in% se.fe.sector.emiMkt$sector) {
+      varName[["sector"]] <- c(
+        indst = "Industry",
+        build = "Buildings",
+        trans = "Transport",
+        CDR = "CDR"
+      )
+    }
+    ## End backwards compatibility
+
     ## add rawdata price variables, calculated from marginals, to the reporting
     addVar <- function(input, var, namevector, fe, se, sector, emiMkt) { # function to add only variables if they were not saved already
       name <- paste0("Price|Final Energy|", paste(namevector, collapse = "|"), " (US$2017/GJ)")
       name <- gsub("||", "|", name, fixed = TRUE)
       name <- gsub("| (", " (", name, fixed = TRUE)
-      if (any(is.na(namevector))) warning("In reportPrices, addVar called with a NA value: ", name)
+      if (any(is.na(namevector))) {
+        stop("In reportPrices, addVar called with a NA value: ", name)
+      }
       if (name %in% getItems(input, 3)) {
         return(NULL)
       } else {
@@ -716,7 +733,7 @@ reportPrices <- function(gdx, output = NULL, regionSubsetList = NULL,
   fixedyears <- getYears(out)[getYears(out, as.integer = TRUE) < cm_startyear]
   if (!is.null(gdx_ref) && length(fixedyears) > 0) {
     message("reportPrices loads price for < cm_startyear from gdx_ref.")
-    priceRef <- try(reportPrices(gdx_ref, output = NULL, regionSubsetList = regionSubsetList, t = t))
+    priceRef <- try(reportPrices(gdx_ref, output = NULL, regionSubsetList = regionSubsetList, t = t, extraData = extraData))
     if (!inherits(priceRef, "try-error")) {
       joinedNamesRep <- intersect(getNames(out), getNames(priceRef))
       joinedRegions <- intersect(getItems(priceRef, dim = 1), getItems(out, dim = 1))
@@ -886,7 +903,7 @@ reportPrices <- function(gdx, output = NULL, regionSubsetList = NULL,
     "Price|Primary Energy|Oil (US$2017/GJ)"                            = "PE|Oil (EJ/yr)",
     "Price|Primary Energy|Gas (US$2017/GJ)"                            = "PE|Gas (EJ/yr)",
     "Price|Primary Energy|Coal (US$2017/GJ)"                           = "PE|Coal (EJ/yr)",
-    "Price|Primary Energy|Nuclear (US$2017/GJ)"                        = "PE|Nuclear (EJ/yr)",
+    "Price|Primary Energy|Nuclear (US$2017/kg_Ur)"                     = "PE|Nuclear (EJ/yr)",
     "Price|Primary Energy|Biomass|1st Generation|Sugar and Starch (US$2017/GJ)" = "PE|Biomass|1st Generation (EJ/yr)",
     "Price|Primary Energy|Biomass|1st Generation|Oil-based (US$2017/GJ)" = "PE|Biomass|1st Generation (EJ/yr)",
 
