@@ -8,3 +8,5 @@ tests/testthat/test-convGDX2mif-data
 renv
 *.Rproj
 .positai
+.vscode
+debugging.r

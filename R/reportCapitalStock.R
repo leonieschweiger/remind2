@@ -35,9 +35,9 @@ reportCapitalStock <- function(gdx,
 
   pm_conv_cap_2_MioLDV <- 650  # The world has ~715million cars in 2005 (IEA TECO2)
 
-  # read sets
   teall2rlf <- readGDX(gdx, name = c("te2rlf", "teall2rlf"), format = "first_found")
   teue2rlf <- readGDX(gdx, name = c("teue2rlf", "tees2rlf"), format = "first_found")
+  te <- readGDX(gdx,name=c("te"),format="first_found") #TOCHECK:QIANZHI
 
   # read variables
   vm_cap <- readGDX(gdx, name = c("vm_cap"), field = "l", format = "first_found")
@@ -49,6 +49,7 @@ reportCapitalStock <- function(gdx,
   # read parameters
   ppfKap_Ind <- readGDX(gdx, name = "ppfkap_industry_dyn37", react = "silent")
   steel_process_based <- "steel" %in% readGDX(gdx, "secInd37Prc", react = "silent")
+  chemicals_process_based <- "chemicals" %in% readGDX(gdx, "secInd37Prc", react='silent') #TOCHECK:QIANZHI
 
   # calculate maximal temporal resolution
   y <- Reduce(intersect, list(getYears(vm_cap), getYears(vm_costTeCapital)))
@@ -120,7 +121,7 @@ reportCapitalStock <- function(gdx,
     mixer <- tribble(
       ~pf,                     ~name,
       "kap_cement",            "Cement",
-      "kap_chemicals",         "Chemicals",
+      #"kap_chemicals",         "Chemicals",
       "kap_otherInd",          "other")
 
     if (!steel_process_based) {
@@ -128,6 +129,13 @@ reportCapitalStock <- function(gdx,
         ~pf,                     ~name,
         "kap_steel_primary",     "Primary Steel",
         "kap_steel_secondary",   "Secondary Steel"))
+    }
+    
+    #TOCHECK:QIANZHI
+    if (!chemicals_process_based) {
+      mixer <- bind_rows(mixer, tribble(
+        ~pf,                     ~name,
+        'kap_chemicals',     'Chemicals'))
     }
 
     if (0 != length(setdiff(ppfKap_Ind, mixer$pf))) {
