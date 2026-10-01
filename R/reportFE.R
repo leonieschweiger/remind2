@@ -766,11 +766,11 @@ reportFE <- function(gdx, regionSubsetList = NULL,
       # technologies and operation modes that belong to primary and secondary steel
       teOpmoSteelPrimary <- tePrc2ue %>%
         filter(.data$all_in == "ue_steel_primary")
-      teSteelPrimary <- teOpmoSteelPrimary %>% pull("tePrc")
+      teSteelPrimary <- teOpmoSteelPrimary %>% pull("all_te")
       opmoSteelPrimary <- teOpmoSteelPrimary %>% pull("opmoPrc")
       teOpmoSteelSecondary <- tePrc2ue %>%
         filter(.data$all_in == "ue_steel_secondary")
-      teSteelSecondary <- teOpmoSteelSecondary %>% pull("tePrc")
+      teSteelSecondary <- teOpmoSteelSecondary %>% pull("all_te")
       opmoSteelSecondary <- teOpmoSteelSecondary %>% pull("opmoPrc")
 
       # Electricity uses by primary/secondary steel
