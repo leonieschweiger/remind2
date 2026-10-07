@@ -54,6 +54,7 @@ reportEmi <- function(gdx, output = NULL, regionSubsetList = NULL,
 
   # switches relevant for emissions reporting
   cm_multigasscen <- readGDX(gdx, "cm_multigasscen")
+  chemicals_process_based <- "chemicals" %in% readGDX(gdx, "secInd37Prc", react='silent')
 
   # sets required
   pe2se <- readGDX(gdx, "pe2se") # pe2se conversions
@@ -1859,7 +1860,7 @@ reportEmi <- function(gdx, output = NULL, regionSubsetList = NULL,
     ),
     # carbon in non-plastics
     setNames(
-      dimSums(mselect(v37_feedstocksCarbon), dim = 3) * (1 - s37_plasticsShare) * GtC_2_MtCO2,
+      (dimSums(v37_feedstocksCarbon, dim = 3) - dimSums(v37_plasticsCarbon, dim = 3)) * GtC_2_MtCO2,
       "Carbon Management|Materials|+|Non-Plastics (Mt CO2/yr)"
     ),
     # total co2 in materials
