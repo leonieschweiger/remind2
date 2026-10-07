@@ -396,9 +396,6 @@ reportEmi <- function(gdx, output = NULL, regionSubsetList = NULL,
   # read in share of non-plastics carbon that gets emitted
   cm_nonPlasticFeedstockEmiShare <- readGDX(gdx, "cm_nonPlasticFeedstockEmiShare") %>%
     as.vector()
-  # read in share of plastics in feedstocks
-  s37_plasticsShare <- readGDX(gdx, "s37_plasticsShare") %>%
-    as.vector()
 
 
   # utility functions ----
@@ -1888,12 +1885,12 @@ reportEmi <- function(gdx, output = NULL, regionSubsetList = NULL,
 
     # carbon in non-plastics that is emitted
     setNames(
-      dimSums(mselect(v37_feedstocksCarbon), dim = 3) * (1 - s37_plasticsShare) * cm_nonPlasticFeedstockEmiShare * GtC_2_MtCO2,
+      (dimSums(v37_feedstocksCarbon, dim = 3) - dimSums(v37_plasticsCarbon, dim = 3)) * cm_nonPlasticFeedstockEmiShare * GtC_2_MtCO2,
       "Carbon Management|Materials|Non-Plastics|+|Incineration (Mt CO2/yr)"
     ),
     # carbon in non-plastics that is not emitted
     setNames(
-      dimSums(mselect(v37_feedstocksCarbon), dim = 3) * (1 - s37_plasticsShare) * (1 - cm_nonPlasticFeedstockEmiShare) * GtC_2_MtCO2,
+      (dimSums(v37_feedstocksCarbon, dim = 3) - dimSums(v37_plasticsCarbon, dim = 3)) * (1 - cm_nonPlasticFeedstockEmiShare) * GtC_2_MtCO2,
       "Carbon Management|Materials|Non-Plastics|+|Other destination (Mt CO2/yr)"
     )
   )
@@ -1941,9 +1938,11 @@ reportEmi <- function(gdx, output = NULL, regionSubsetList = NULL,
         # (based on vm_incinerationCCS part of which gets reemitted via CCU)
         + dimSums(mselect(WasteCCU, all_enty = entySEfos), dim = 3)
           # emissions from non-plastic waste
-          + dimSums(mselect(v37_feedstocksCarbon,
-            all_enty = entySEfos
-          ), dim = 3) * (1 - s37_plasticsShare) * cm_nonPlasticFeedstockEmiShare
+          + (
+            dimSums(mselect(v37_feedstocksCarbon, all_enty = entySEfos), dim = 3) 
+            - dimSums(mselect(v37_plasticsCarbon, all_enty = entySEfos), dim = 3)
+            ) 
+          * cm_nonPlasticFeedstockEmiShare
       ) * GtC_2_MtCO2,
       "Carbon Management|Feedstocks|Emitted|+|Fossil (Mt CO2/yr)"
     )
@@ -1962,9 +1961,11 @@ reportEmi <- function(gdx, output = NULL, regionSubsetList = NULL,
         # (based on vm_incinerationCCS part of which gets reemitted via CCU)
         + dimSums(mselect(WasteCCU, all_enty = entySEbio), dim = 3)
           # emissions from non-plastic waste
-          + dimSums(mselect(v37_feedstocksCarbon,
-            all_enty = entySEbio
-          ), dim = 3) * (1 - s37_plasticsShare) * cm_nonPlasticFeedstockEmiShare
+          + (
+            dimSums(mselect(v37_feedstocksCarbon, all_enty = entySEbio), dim = 3) 
+            - dimSums(mselect(v37_plasticsCarbon, all_enty = entySEbio), dim = 3)
+            ) 
+          * cm_nonPlasticFeedstockEmiShare
       ) * GtC_2_MtCO2,
       "Carbon Management|Feedstocks|Emitted|+|Biomass (Mt CO2/yr)"
     )
@@ -1985,9 +1986,11 @@ reportEmi <- function(gdx, output = NULL, regionSubsetList = NULL,
         + dimSums(mselect(WasteCCU, all_enty = entySEsyn), dim = 3)
 
           # emissions from non-plastic waste
-          + dimSums(mselect(v37_feedstocksCarbon,
-            all_enty = entySEsyn
-          ), dim = 3) * (1 - s37_plasticsShare) * cm_nonPlasticFeedstockEmiShare
+          + (
+            dimSums(mselect(v37_feedstocksCarbon, all_enty = entySEsyn), dim = 3) 
+            - dimSums(mselect(v37_plasticsCarbon, all_enty = entySEsyn), dim = 3)
+            ) 
+          * cm_nonPlasticFeedstockEmiShare
       ) * GtC_2_MtCO2,
       "Carbon Management|Feedstocks|Emitted|+|Synthetic (Mt CO2/yr)"
     )
@@ -2004,13 +2007,17 @@ reportEmi <- function(gdx, output = NULL, regionSubsetList = NULL,
         # (based on vm_incinerationCCS part of which gets reemitted via CCU)
         + dimSums(WasteCCU, dim = 3)
           # emissions from non-plastic waste
-          + dimSums(mselect(v37_feedstocksCarbon), dim = 3) * (1 - s37_plasticsShare) * cm_nonPlasticFeedstockEmiShare
+          + (
+            dimSums(v37_feedstocksCarbon, dim = 3) 
+            - dimSums(v37_plasticsCarbon, dim = 3)
+            ) 
+          * cm_nonPlasticFeedstockEmiShare
       ) * GtC_2_MtCO2,
       "Carbon Management|Feedstocks|+|Emitted (Mt CO2/yr)"
     )
   )
 
-  # feestock carbon stored
+  # feedstock carbon stored
 
   # fossil feedstock carbon stored
   out <- mbind(
@@ -2029,9 +2036,11 @@ reportEmi <- function(gdx, output = NULL, regionSubsetList = NULL,
             all_enty = entySEfos
           ), dim = 3) * (1 - pm_incinerationRate)
           # carbon in non-emitted non-plastic waste
-          + dimSums(mselect(v37_feedstocksCarbon,
-            all_enty = entySEfos
-          ), dim = 3) * (1 - s37_plasticsShare) * (1 - cm_nonPlasticFeedstockEmiShare)
+          + (
+            dimSums(mselect(v37_feedstocksCarbon, all_enty = entySEfos), dim = 3) 
+            - dimSums(mselect(v37_plasticsCarbon, all_enty = entySEfos), dim = 3)
+            )  
+          * (1 - cm_nonPlasticFeedstockEmiShare)
       ) * GtC_2_MtCO2,
       "Carbon Management|Feedstocks|Stored|+|Fossil (Mt CO2/yr)"
     )
@@ -2054,9 +2063,11 @@ reportEmi <- function(gdx, output = NULL, regionSubsetList = NULL,
             all_enty = entySEbio
           ), dim = 3) * (1 - pm_incinerationRate)
           # carbon in non-emitted non-plastic waste
-          + dimSums(mselect(v37_feedstocksCarbon,
-            all_enty = entySEbio
-          ), dim = 3) * (1 - s37_plasticsShare) * (1 - cm_nonPlasticFeedstockEmiShare)
+          + (
+            dimSums(mselect(v37_feedstocksCarbon, all_enty = entySEbio), dim = 3) 
+            - dimSums(mselect(v37_plasticsCarbon, all_enty = entySEbio), dim = 3)
+            ) 
+          * (1 - cm_nonPlasticFeedstockEmiShare)
       ) * GtC_2_MtCO2,
       "Carbon Management|Feedstocks|Stored|+|Biomass (Mt CO2/yr)"
     )
@@ -2079,9 +2090,11 @@ reportEmi <- function(gdx, output = NULL, regionSubsetList = NULL,
             all_enty = entySEsyn
           ), dim = 3) * (1 - pm_incinerationRate)
           # carbon in non-emitted non-plastic waste
-          + dimSums(mselect(v37_feedstocksCarbon,
-            all_enty = entySEsyn
-          ), dim = 3) * (1 - s37_plasticsShare) * (1 - cm_nonPlasticFeedstockEmiShare)
+          + (
+            dimSums(mselect(v37_feedstocksCarbon, all_enty = entySEsyn), dim = 3) 
+            - dimSums(mselect(v37_plasticsCarbon, all_enty = entySEsyn), dim = 3)
+            ) 
+          * (1 - cm_nonPlasticFeedstockEmiShare)
       ) * GtC_2_MtCO2,
       "Carbon Management|Feedstocks|Stored|+|Synthetic (Mt CO2/yr)"
     )
@@ -2100,7 +2113,11 @@ reportEmi <- function(gdx, output = NULL, regionSubsetList = NULL,
           # carbon in non-incinerated plastic waste
           + dimSums(mselect(v37_plasticWaste), dim = 3) * (1 - pm_incinerationRate)
           # carbon in non-emitted non-plastic waste
-          + dimSums(mselect(v37_feedstocksCarbon), dim = 3) * (1 - s37_plasticsShare) * (1 - cm_nonPlasticFeedstockEmiShare)
+          + (
+            dimSums(v37_feedstocksCarbon, dim = 3) 
+            - dimSums(v37_plasticsCarbon, dim = 3)
+            ) 
+          * (1 - cm_nonPlasticFeedstockEmiShare)
       ) * GtC_2_MtCO2,
       "Carbon Management|Feedstocks|+|Stored (Mt CO2/yr)"
     )
