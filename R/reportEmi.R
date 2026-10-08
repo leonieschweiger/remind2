@@ -123,6 +123,8 @@ reportEmi <- function(gdx, output = NULL, regionSubsetList = NULL,
   pm_emifac <- readGDX(gdx, "pm_emifac", restore_zeros = FALSE)[, t, ]
   # emissions factors of non-energy use
   pm_emifacNonEnergy <- readGDX(gdx, "pm_emifacNonEnergy", restore_zeros = FALSE, react = "silent")[, t, ]
+  # chemical process emissions from feedstocks as computed in the model (entering vm_emiAllMkt)
+  v37_emiChemicalsProcess <- readGDX(gdx, "v37_emiChemicalsProcess", field = "l", restore_zeros = FALSE, react = "silent")[, t, ]
   # primary energy demand (pe2se emissions factors applied to)
   vm_demPE <- readGDX(gdx, "vm_demPE", field = "l", restore_zeros = FALSE)[, t, ]
   # final energy demand (se2fe emissions factors applied to)
@@ -1390,9 +1392,8 @@ reportEmi <- function(gdx, output = NULL, regionSubsetList = NULL,
 
   ### 2.2 Industrial Process Emissions ----
 
-  # calculate chemical process emissions from feedstocks treatment
-  EmiFac_NonEn.co2 <- collapseDim(pm_emifacNonEnergy[, , "co2"])
-  EmiProcess_Feedstocks <- pm_emifacNonEnergy[, , "co2"] * vm_demFENonEnergySector[, , getNames(EmiFac_NonEn.co2)]
+  # chemical process emissions from feedstocks treatment
+  EmiProcess_Feedstocks <- mselect(v37_emiChemicalsProcess, all_enty = "co2")
 
   out <- mbind(
     out,
