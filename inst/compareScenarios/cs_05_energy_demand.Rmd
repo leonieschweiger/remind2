@@ -439,7 +439,16 @@ showAreaAndBarPlots(data, items, tot, orderVars = "user", scales = "fixed")
 #### FE mix Chemicals
 ```{r 05_energy_demand/FE mix Chemicals}
 tot <- "FE|Industry|Chemicals"
-items <- c(
+if ("FE|Industry|Chemicals|Other Chemicals|Conventional" %in% levels(data$variable)){ # if process-based chemical is used
+  items <- c(
+  "FE|Industry|Chemicals|Electricity",
+  "FE|Industry|Chemicals|Hydrogen",  
+  "FE|Industry|Chemicals|Gases",
+  "FE|Industry|Chemicals|Solids",
+  "FE|Industry|Chemicals|Liquids",
+  NULL)
+} else {
+  items <- c(
   "FE|Industry|Chemicals|Electricity|Mechanical work and low-temperature heat",
   "FE|Industry|Chemicals|Electricity|High-temperature heat",
   "FE|Industry|Chemicals|Hydrogen",  
@@ -447,6 +456,7 @@ items <- c(
   "FE|Industry|Chemicals|Solids",
   "FE|Industry|Chemicals|Liquids",
   NULL)
+}
 showAreaAndBarPlots(data, items, tot, scales = "fixed")
 ```
 
