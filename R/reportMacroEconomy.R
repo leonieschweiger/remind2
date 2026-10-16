@@ -34,7 +34,7 @@ reportMacroEconomy <- function(gdx,
 
 
   steel_process_based <- "steel" %in% gdx2::readGDX(gdx, "secInd37Prc", react = "silent")
-  chemicals_process_based <- "chemicals" %in% gdx2::readGDX(gdx, "secInd37Prc", react='silent')
+  chemicals_process_based <- "chemicals" %in% gdx2::readGDX(gdx, "secInd37Prc", react = "silent")
   cons <- setNames(
     gdx2::readGDX(gdx, name = "vm_cons", select = list("_field" = "level"))[, t, ] * 1000,
     "Consumption (billion US$2017/yr)"

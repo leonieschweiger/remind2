@@ -37,7 +37,6 @@ reportCapitalStock <- function(gdx,
   # read sets
   teall2rlf <- gdx2::readGDX(gdx, name = c("te2rlf", "teall2rlf"), format = "first_found")
   teue2rlf <- gdx2::readGDX(gdx, name = c("teue2rlf", "tees2rlf"), format = "first_found")
-  te <- gdx2::readGDX(gdx,name=c("te"),format="first_found") #TOCHECK:QIANZHI
 
   # read variables
   vm_cap <- gdx2::readGDX(gdx, name = "vm_cap", select = list("_field" = "level"), restoreZeros = FALSE)
@@ -51,7 +50,7 @@ reportCapitalStock <- function(gdx,
   # read parameters
   ppfKap_Ind <- gdx2::readGDX(gdx, name = "ppfkap_industry_dyn37", react = "silent")
   steel_process_based <- "steel" %in% gdx2::readGDX(gdx, "secInd37Prc", react = "silent")
-  chemicals_process_based <- "chemicals" %in% gdx2::readGDX(gdx, "secInd37Prc", react='silent') #TOCHECK:QIANZHI
+  chemicals_process_based <- "chemicals" %in% gdx2::readGDX(gdx, "secInd37Prc", react = "silent") #TOCHECK:QIANZHI
 
   # calculate maximal temporal resolution
   y <- Reduce(intersect, list(getYears(vm_cap), getYears(vm_costTeCapital)))

@@ -144,7 +144,8 @@ reportEmi <- function(gdx, output = NULL, regionSubsetList = NULL,
   # emissions factors of non-energy use
   pm_emifacNonEnergy <- gdx2::readGDX(gdx, "pm_emifacNonEnergy", restoreZeros = FALSE, react = "silent")[, t, ]
   # chemical process emissions from feedstocks as computed in the model (entering vm_emiAllMkt)
-  v37_emiChemicalsProcess <- gdx2::readGDX(gdx, "v37_emiChemicalsProcess", field = "l", restore_zeros = FALSE, react = "silent")[, t, ]
+  v37_emiChemicalsProcess <- gdx2::readGDX(gdx, "v37_emiChemicalsProcess", select = list("_field" = "level"),
+                                           restoreZeros = FALSE, react = "silent")[, t, ]
   # primary energy demand (pe2se emissions factors applied to)
   vm_demPE <- gdx2::readGDX(gdx, "vm_demPE", select = list("_field" = "level"), restoreZeros = FALSE)[, t, ]
   # final energy demand (se2fe emissions factors applied to)

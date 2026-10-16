@@ -119,9 +119,9 @@ reportFE <- function(gdx, regionSubsetList = NULL,
   indu_mod <- find_real_module(module2realisation, "industry")
   buil_mod <- find_real_module(module2realisation, "buildings")
 
-  any_process_based <- length(gdx2::readGDX(gdx, "secInd37Prc", react='silent')) > 0.
-  steel_process_based <- "steel" %in% gdx2::readGDX(gdx, "secInd37Prc", react='silent')
-  chemicals_process_based <- "chemicals" %in% gdx2::readGDX(gdx, "secInd37Prc", react='silent') #TOCHECK:QIANZHI
+  any_process_based <- length(gdx2::readGDX(gdx, "secInd37Prc", react = "silent")) > 0.
+  steel_process_based <- "steel" %in% gdx2::readGDX(gdx, "secInd37Prc", react = "silent")
+  chemicals_process_based <- "chemicals" %in% gdx2::readGDX(gdx, "secInd37Prc", react = "silent") #TOCHECK:QIANZHI
 
 
 
@@ -529,8 +529,9 @@ reportFE <- function(gdx, regionSubsetList = NULL,
     o37_demFeIndRoute <- gdx2::readGDX(gdx, name = "o37_demFeIndRoute", restoreZeros = FALSE, react = "silent")[, t, ] * TWa_2_EJ
     o37_demFeIndRoute[is.na(o37_demFeIndRoute)] <- 0.
 
-    v37_matFlow <- readGDX(gdx, name=c("v37_matFlow"), field="l", restore_zeros=FALSE,format= "first_found")[,t,] 
-    v37_matFlow [is.na(v37_matFlow )] <- 0.
+    v37_matFlow <- gdx2::readGDX(gdx, name = "v37_matFlow", select = list("_field" = "level"),
+                                 restoreZeros = FALSE)[, t, ]
+    v37_matFlow[is.na(v37_matFlow)] <- 0.
     # mapping of process to output materials
     tePrc2ue <- gdx2::readGDX(gdx, "tePrc2ue", restoreZeros = FALSE)
   }
