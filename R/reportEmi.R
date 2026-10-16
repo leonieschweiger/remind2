@@ -2224,6 +2224,10 @@ reportEmi <- function(gdx, output = NULL, regionSubsetList = NULL,
 
   ### 3.4 Carbon usage ----
 
+  # CCU technologies; chemical methanol and fertilizer only exist with process-based chemicals
+  teCCUshort <- intersect(c("MeOH", "h22ch4", "meSyH2", "fertProdH2"),
+                          getItems(vm_co2CCUshort, dim = 3.3))
+
   # storage/usage of captured carbon
   out <- mbind(
     out,
@@ -2234,7 +2238,7 @@ reportEmi <- function(gdx, output = NULL, regionSubsetList = NULL,
     ),
     # carbon in synfuels
     setNames(
-      collapseDim(dimSums(vm_co2CCUshort[, , c("MeOH", "h22ch4","meSyH2","fertProdH2")], dim = 3, na.rm = TRUE)) * GtC_2_MtCO2,
+      collapseDim(dimSums(vm_co2CCUshort[, , teCCUshort], dim = 3, na.rm = TRUE)) * GtC_2_MtCO2,
       "Carbon Management|Usage (Mt CO2/yr)"
     ),
     # carbon in synthetic liquids
@@ -2246,18 +2250,30 @@ reportEmi <- function(gdx, output = NULL, regionSubsetList = NULL,
     setNames(
       collapseDim(vm_co2CCUshort[, , "h22ch4"]) * GtC_2_MtCO2,
       "Carbon Management|Usage|+|Synthetic Gases (Mt CO2/yr)"
-    ),
-    # carbon in chemical methanol
-    setNames(
-      collapseDim(vm_co2CCUshort[, , "meSyH2"]) * GtC_2_MtCO2,
-      "Carbon Management|Usage|+|Chemical Methanol (Mt CO2/yr)"
-    ),
-    # carbon in chemical fertilizer
-    setNames(
-      collapseDim(vm_co2CCUshort[, , "fertProdH2"]) * GtC_2_MtCO2,
-      "Carbon Management|Usage|+|Chemical Fertilizer (Mt CO2/yr)"
     )
   )
+
+  if ("meSyH2" %in% teCCUshort) {
+    out <- mbind(
+      out,
+      # carbon in chemical methanol
+      setNames(
+        collapseDim(vm_co2CCUshort[, , "meSyH2"]) * GtC_2_MtCO2,
+        "Carbon Management|Usage|+|Chemical Methanol (Mt CO2/yr)"
+      )
+    )
+  }
+
+  if ("fertProdH2" %in% teCCUshort) {
+    out <- mbind(
+      out,
+      # carbon in chemical fertilizer
+      setNames(
+        collapseDim(vm_co2CCUshort[, , "fertProdH2"]) * GtC_2_MtCO2,
+        "Carbon Management|Usage|+|Chemical Fertilizer (Mt CO2/yr)"
+      )
+    )
+  }
 
   if ("ccsinjeon" %in% getItems(vm_co2CCS, dim = "all_te")) {
     out <- mbind(
