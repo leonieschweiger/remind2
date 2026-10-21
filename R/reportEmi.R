@@ -336,7 +336,7 @@ reportEmi <- function(gdx, output = NULL, regionSubsetList = NULL,
 
 
   ## Read-in chemical feedstocks variables ----
-  o37_carbonaceousSeFeShare <- gdx2::readGDX(gdx, "o37_carbonaceousSeFeShare", select = list("_field" = "level"), temporal = 1, spatial = 2,
+  o37_carbonaceousSeFeShare <- gdx2::readGDX(gdx, "o37_carbonaceousSeFeShare", temporal = 1, spatial = 2,
                                 restoreZeros = FALSE, react = "silent")[, t, ]
 
   v37_plasticsCarbon <- gdx2::readGDX(gdx, "v37_plasticsCarbon", select = list("_field" = "level"), temporal = 1, spatial = 2,
@@ -373,7 +373,7 @@ reportEmi <- function(gdx, output = NULL, regionSubsetList = NULL,
 
 
   vm_incinerationCCS <- tryCatch({
-    gdx2::readGDX(gdx, "o37_incinerationCCS", select = list("_field" = "level"), restoreZeros = FALSE, spatial = 2, react = "silent")[, t, ]
+    gdx2::readGDX(gdx, "o37_incinerationCCS", restoreZeros = FALSE, spatial = 2, react = "silent")[, t, ]
   }, error = function(e) NULL)
 
   if (is.null(vm_incinerationCCS)) {
